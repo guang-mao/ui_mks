@@ -1,0 +1,87 @@
+# Qt generated files
+*.pro.user
+*.qbs.user
+*.pro.user.*
+*.qbs.user.*
+*.moc
+*.obj
+*.o
+*.d
+*.qrc
+*.a
+*.so
+*.dll
+*.dylib
+*.pyc
+*.pyo
+
+# Qt Creator database and configuration
+.qtcreator
+.qmake.stash
+CMakeLists.txt.user
+
+# General build files
+build-*
+*.swp
+*.swo
+*.bak
+*.backup
+*.tmp
+*.temp
+*.log
+
+# Compiled object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+
+# Debug files
+*.dSYM/
+*.su
+*.idb
+*.pdb
+*.ipdb
+*.pgd
+*.ncb
+*.sdf
+*.suo
+*.opt
+*.plg
+*.o.d
+
+# QtCreator specific files
+*.autosave
+
+# Other
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
