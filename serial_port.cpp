@@ -31,6 +31,12 @@ void serial_port::initialize_defaults()
     return;
 }
 
+QByteArray serial_port::read_message()
+{
+    QMutexLocker locker(&lock);
+    return serialPort->readAll();
+}
+
 int serial_port::write_message(uint8_t *txf, uint16_t length)
 {
     // Write buffer to serial port, locks port while writing
@@ -75,11 +81,11 @@ void serial_port::stop()
 
 int serial_port::_read_port()
 {
-    QMutexLocker locker(&lock);
+    //QMutexLocker locker(&lock);
 
-    rxBuf = serialPort->readAll();
+    //rxBuf = serialPort->readAll();
 
-    return rxBuf.size();
+    return 0;//rxBuf.size();
 }
 
 int serial_port::_write_port(const char *buf, unsigned length)

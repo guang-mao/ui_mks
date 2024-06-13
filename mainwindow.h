@@ -5,7 +5,7 @@
 #include <QString>
 #include <QMainWindow>
 //#include "generic_thread.h"
-#include "senderthread.h"
+//#include "senderthread.h"
 #include "serial_port.h"
 
 QT_BEGIN_NAMESPACE
@@ -22,12 +22,14 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-    serial_port *_ser;
+    serial_port *ser;
     QTimer *timer;
-    SenderThread *sender = nullptr;
-    //TxThread *tx_thread;
+    QByteArray rxBuf;
+    QByteArray packet;
+    //SenderThread *sender = nullptr;
 
 public slots:
+    void onReadyRead();
     void actuateCommand();
 
 private:

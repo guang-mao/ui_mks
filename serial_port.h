@@ -15,13 +15,12 @@ public:
     serial_port(const QString port, int baudrate);
     ~serial_port();
 
-    int read_message();
+    QByteArray read_message();
     int write_message(uint8_t *txf, uint16_t length);
 
     bool start();
     void stop();
 
-    QByteArray rxBuf;
     QSerialPort *serialPort;
 private:
 

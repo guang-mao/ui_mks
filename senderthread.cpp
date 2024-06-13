@@ -11,10 +11,10 @@ extern QString used_port;
 extern int used_baudRate;
 extern BlockingQueue<QByteArray> txQueue;
 
-SenderThread::SenderThread(QObject *parent) :
-    QThread(parent), is_open(false)
+SenderThread::SenderThread(serial_port *ser, QObject *parent) :
+    QThread(parent), ser(ser), is_open(false)
 {
-    Start();
+    //Start();
 }
 
 //! [0]
@@ -47,20 +47,16 @@ void SenderThread::Start()
 //! [4]
 void SenderThread::run()
 {
-    if ( is_open == false )
+    if ( ser->serialPort->isOpen() )
     {
-        ser = new serial_port(used_port, used_baudRate);
-        if ( ser->start() )
-        {
-            is_open = true;
-            m_quit = false;
-        } else
-        {
-            is_open = false;
-            m_quit = true;
-        }
+        is_open = true;
+        m_quit = false;
+    } else
+    {
+        is_open = false;
+        m_quit = true;
     }
-    // 超級迴圈
+
     while ( !m_quit )
     {
         QByteArray data = txQueue.dequeue();

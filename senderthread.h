@@ -15,7 +15,7 @@ class SenderThread : public QThread
     Q_OBJECT
 
 public:
-    explicit SenderThread(QObject *parent = nullptr);
+    explicit SenderThread(serial_port *ser, QObject *parent = nullptr);
     ~SenderThread();
 
     void Start();
