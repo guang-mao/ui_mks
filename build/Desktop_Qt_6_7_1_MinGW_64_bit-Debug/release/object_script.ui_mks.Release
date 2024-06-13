@@ -1,3 +1,4 @@
+release/api_uartcomm.o
 release/generic_thread.o
 release/ifacelistupdater.o
 release/main.o

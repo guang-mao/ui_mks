@@ -1,3 +1,4 @@
+debug/api_uartcomm.o
 debug/generic_thread.o
 debug/ifacelistupdater.o
 debug/main.o

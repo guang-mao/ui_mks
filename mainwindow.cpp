@@ -18,18 +18,11 @@ MainWindow::MainWindow(QWidget *parent)
 
     //_ser = new serial_port(used_port, used_baudRate);
 
-
     if ( 1 ) //_ser->start()
     {
         // 创建发送线程
         sender = new SenderThread(this);
         //sender->start();
-
-        //tx_thread = new TxThread(used_port, used_baudRate);
-        //tx_thread->moveToThread(tx_thread);
-        //tx_thread = new TxThread(_ser);
-        //tx_thread->start();
-        //tx_thread->_ser->write_message( string, sizeof(string) );
 
         // 創建一個新的 QTimer 實例，並將其設置為 mainwindow 的子物件
         timer = new QTimer(this);
@@ -62,9 +55,12 @@ MainWindow::~MainWindow()
 void MainWindow::actuateCommand()
 {
     static actuateCommand_req_t req;
-    mks_equipment_actuator_actuateCommand_encode(&req, 0, 1, 1500);
+
+    uint8_t mode = ( (uint8_t) ( ui->ckb_act->isChecked() ) << 0u ) | ( (uint8_t) ( ui->ckb_pos->isChecked()  ) << 1u ) | \
+                   ( (uint8_t) ( ui->ckb_cir->isChecked() ) << 2u ) | ( (uint8_t) ( ui->ckb_temp->isChecked() ) << 3u );
+    mks_equipment_actuator_actuateCommand_encode(&req, 0, mode, 1500);
     QByteArray byteArray(reinterpret_cast<char*>(&req), sizeof(req));
     txQueue.enqueue(byteArray);
-    qDebug() << "Queue Size: " << txQueue.queue.count() << "\n";
+    //qDebug() << "Queue Size: " << txQueue.queue.count() << "\n";
     req.byte4.fcn.fsh_cnt++;
 }

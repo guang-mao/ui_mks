@@ -4,9 +4,9 @@
 #include <QTimer>
 #include <QString>
 #include <QMainWindow>
-#include "generic_thread.h"
+//#include "generic_thread.h"
 #include "senderthread.h"
-//#include "serial_port.h"
+#include "serial_port.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -25,7 +25,7 @@ public:
     serial_port *_ser;
     QTimer *timer;
     SenderThread *sender = nullptr;
-    TxThread *tx_thread;
+    //TxThread *tx_thread;
 
 public slots:
     void actuateCommand();

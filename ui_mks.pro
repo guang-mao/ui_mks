@@ -9,6 +9,7 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    api_uartcomm.c \
     generic_thread.cpp \
     ifacelistupdater.cpp \
     main.cpp \
@@ -20,6 +21,7 @@ SOURCES += \
 
 HEADERS += \
     BlockingQueue.h \
+    api_uartcomm.h \
     generic_thread.h \
     ifacelistupdater.h \
     mainwindow.h \
