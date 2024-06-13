@@ -33,7 +33,7 @@ void serial_port::initialize_defaults()
 
 QByteArray serial_port::read_message()
 {
-    QMutexLocker locker(&lock);
+    //QMutexLocker locker(&lock);
     return serialPort->readAll();
 }
 
@@ -90,7 +90,7 @@ int serial_port::_read_port()
 
 int serial_port::_write_port(const char *buf, unsigned length)
 {
-    QMutexLocker locker(&lock);
+    //QMutexLocker locker(&lock);
     int bytesWritten = serialPort->write(buf, length);
     serialPort->waitForBytesWritten(5);
     return bytesWritten;

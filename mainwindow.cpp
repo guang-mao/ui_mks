@@ -43,65 +43,67 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-typedef enum {
-    NONE = 0,
-    HEADER1,
-    HEADER2,
-    COMMAND,
-    MODE,
-} state;
-state st = NONE;
-uint8_t length = 0;
+// 計算封包長度的函數
+int calculatePacketLength(const QByteArray &buffer) {
+    if (buffer.size() < 4) {
+        return -1; // 不足以檢查第四個字節
+    }
+
+    unsigned char byte4 = static_cast<unsigned char>(buffer[3]);
+    int length = 8; // 最小長度
+
+    // 根據 byte4 的位來增加封包長度
+    if (byte4 & 0x01) length += 2; // bit 1
+    if (byte4 & 0x02) length += 4; // bit 2
+    if (byte4 & 0x04) length += 2; // bit 3
+
+    return length;
+}
+
 void MainWindow::onReadyRead()
 {
-    rxBuf = ser->read_message();
-    QByteArray src;
+    rxBuf.append(ser->read_message());
 
-    // if ( rxBuf.size() > 0 )
-
-    while (  ( rxBuf.size() > 0 ) )
+    // 確保有至少8個字節可以檢查 header1 和 header2 以及計算最小封包長度
+    while ( rxBuf.size() >= 8 )
     {
-        src = rxBuf.left(1);
-        switch ( st )
+        if (static_cast<unsigned char>(rxBuf[0]) == 0xbc &&
+            static_cast<unsigned char>(rxBuf[1]) == 0x73 &&
+            static_cast<unsigned char>(rxBuf[3]) == 0x02 )
         {
-        case NONE:
-            if ( *( (uint8_t *) src.data() ) == 0xbc )
-            {
-                st = HEADER1;
-                packet.append(src);
-            } else
-            {
-                st = NONE;
-                packet.clear();
-            }
-            break;
-        case HEADER1:
-            if ( *( (uint8_t *) src.data() ) == 0x73 )
-            {
-                st = HEADER2;
-                packet.append(src);
-            } else
-            {
-                st = NONE;
-                packet.clear();
-            }
-            break;
-        case HEADER2:
-            st = COMMAND;
-            packet.append(src);
-            break;
-        case COMMAND:
-            st = MODE;
-            if ( (uint8_t) packet.at(3) == 0x02 )
-            {
+            // 預期的封包頭部標記和第三個字節為0x02
 
-            } else
+            // 計算封包長度
+            int packetLength = calculatePacketLength(rxBuf);
+            if ( packetLength == -1 )
             {
-
+                // 不足以檢查第四個字節，等待更多數據
+                break;
             }
-            break;
-        case MODE:
-            break;
+
+            // 檢查是否有足夠的數據形成完整封包
+            if ( rxBuf.size() >= packetLength )
+            {
+                // 獲取完整封包數據
+                QByteArray packet = rxBuf.left(packetLength);
+                qDebug() << "Received data:" << packet << "\n";
+                // 處理封包
+                //processPacket(packet);
+
+                // 從緩衝區中移除已處理的封包
+                rxBuf.remove(0, packetLength);
+            }
+            else
+            {
+                // 數據不足以形成一個完整封包，等待更多數據
+                break;
+            }
+        }
+        else
+        {
+            // 非預期的頭部標記或第三個字節不為0x02，移除第一個字節並繼續檢查
+            rxBuf.remove(0, 1);
+        }
     }
     //qDebug() << "Received data:" << packet << "Size:" << packet.size() << "\n";
 }
