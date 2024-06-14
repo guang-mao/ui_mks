@@ -7,6 +7,7 @@
 *****************************************************************************/
 
 #include "../../../mainwindow.h"
+#include <QtGui/qtextcursor.h>
 #include <QtCore/qmetatype.h>
 
 #include <QtCore/qtmochelpers.h>
@@ -38,7 +39,10 @@ constexpr auto qt_meta_stringdata_CLASSMainWindowENDCLASS = QtMocHelpers::string
     "MainWindow",
     "onReadyRead",
     "",
-    "actuateCommand"
+    "actuateCommand",
+    "onButtonLeftClicked",
+    "onButtonMidClicked",
+    "onButtonRightClicked"
 );
 #else  // !QT_MOC_HAS_STRINGDATA
 #error "qtmochelpers.h not found or too old."
@@ -51,7 +55,7 @@ Q_CONSTINIT static const uint qt_meta_data_CLASSMainWindowENDCLASS[] = {
       12,       // revision
        0,       // classname
        0,    0, // classinfo
-       2,   14, // methods
+       5,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -59,10 +63,16 @@ Q_CONSTINIT static const uint qt_meta_data_CLASSMainWindowENDCLASS[] = {
        0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags, initial metatype offsets
-       1,    0,   26,    2, 0x0a,    1 /* Public */,
-       3,    0,   27,    2, 0x0a,    2 /* Public */,
+       1,    0,   44,    2, 0x0a,    1 /* Public */,
+       3,    0,   45,    2, 0x0a,    2 /* Public */,
+       4,    0,   46,    2, 0x0a,    3 /* Public */,
+       5,    0,   47,    2, 0x0a,    4 /* Public */,
+       6,    0,   48,    2, 0x0a,    5 /* Public */,
 
  // slots: parameters
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
 
@@ -81,6 +91,12 @@ Q_CONSTINIT const QMetaObject MainWindow::staticMetaObject = { {
         // method 'onReadyRead'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
         // method 'actuateCommand'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'onButtonLeftClicked'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'onButtonMidClicked'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'onButtonRightClicked'
         QtPrivate::TypeAndForceComplete<void, std::false_type>
     >,
     nullptr
@@ -94,6 +110,9 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         switch (_id) {
         case 0: _t->onReadyRead(); break;
         case 1: _t->actuateCommand(); break;
+        case 2: _t->onButtonLeftClicked(); break;
+        case 3: _t->onButtonMidClicked(); break;
+        case 4: _t->onButtonRightClicked(); break;
         default: ;
         }
     }
@@ -119,13 +138,13 @@ int MainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 2)
+        if (_id < 5)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 2;
+        _id -= 5;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 2)
+        if (_id < 5)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 2;
+        _id -= 5;
     }
     return _id;
 }

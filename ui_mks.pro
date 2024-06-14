@@ -10,23 +10,19 @@ CONFIG += c++17
 
 SOURCES += \
     api_uartcomm.c \
-    generic_thread.cpp \
     ifacelistupdater.cpp \
     main.cpp \
     mainwindow.cpp \
     mks.equipment.actuator.actuateCommand.c \
-    senderthread.cpp \
     serial_port.cpp \
     setup_window.cpp \
 
 HEADERS += \
     BlockingQueue.h \
     api_uartcomm.h \
-    generic_thread.h \
     ifacelistupdater.h \
     mainwindow.h \
     mks.equipment.actuator.actuateCommand.h \
-    senderthread.h \
     serial_port.h \
     setup_window.h \
 

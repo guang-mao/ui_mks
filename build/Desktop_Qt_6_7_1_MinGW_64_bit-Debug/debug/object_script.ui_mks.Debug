@@ -1,14 +1,10 @@
 debug/api_uartcomm.o
-debug/generic_thread.o
 debug/ifacelistupdater.o
 debug/main.o
 debug/mainwindow.o
 debug/mks.equipment.actuator.actuateCommand.o
-debug/senderthread.o
 debug/serial_port.o
 debug/setup_window.o
-debug/moc_generic_thread.o
 debug/moc_ifacelistupdater.o
 debug/moc_mainwindow.o
-debug/moc_senderthread.o
 debug/moc_setup_window.o

@@ -14,6 +14,8 @@
 #include <QtWidgets/QCheckBox>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenuBar>
+#include <QtWidgets/QProgressBar>
+#include <QtWidgets/QPushButton>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QWidget>
 
@@ -27,6 +29,10 @@ public:
     QCheckBox *ckb_cir;
     QCheckBox *ckb_pos;
     QCheckBox *ckb_act;
+    QPushButton *btn_left;
+    QPushButton *btn_mid;
+    QPushButton *btn_right;
+    QProgressBar *progressBar;
     QMenuBar *menubar;
     QStatusBar *statusbar;
 
@@ -56,6 +62,21 @@ public:
         ckb_act->setObjectName("ckb_act");
         ckb_act->setGeometry(QRect(510, 20, 161, 21));
         ckb_act->setFont(font);
+        btn_left = new QPushButton(centralwidget);
+        btn_left->setObjectName("btn_left");
+        btn_left->setGeometry(QRect(40, 130, 91, 71));
+        btn_mid = new QPushButton(centralwidget);
+        btn_mid->setObjectName("btn_mid");
+        btn_mid->setGeometry(QRect(180, 130, 91, 71));
+        btn_right = new QPushButton(centralwidget);
+        btn_right->setObjectName("btn_right");
+        btn_right->setGeometry(QRect(330, 130, 91, 71));
+        progressBar = new QProgressBar(centralwidget);
+        progressBar->setObjectName("progressBar");
+        progressBar->setGeometry(QRect(40, 70, 381, 31));
+        progressBar->setMinimum(900);
+        progressBar->setMaximum(2100);
+        progressBar->setValue(1500);
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName("menubar");
@@ -77,6 +98,10 @@ public:
         ckb_cir->setText(QCoreApplication::translate("MainWindow", "Request Circuit", nullptr));
         ckb_pos->setText(QCoreApplication::translate("MainWindow", "Request Position", nullptr));
         ckb_act->setText(QCoreApplication::translate("MainWindow", "Activate Servo action", nullptr));
+        btn_left->setText(QCoreApplication::translate("MainWindow", "900", nullptr));
+        btn_mid->setText(QCoreApplication::translate("MainWindow", "1500", nullptr));
+        btn_right->setText(QCoreApplication::translate("MainWindow", "2100", nullptr));
+        progressBar->setFormat(QCoreApplication::translate("MainWindow", "%v", nullptr));
     } // retranslateUi
 
 };
