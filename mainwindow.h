@@ -1,14 +1,13 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "commandworker.h"
+
 #include <QTimer>
 #include <QString>
 #include <QMainWindow>
 #include <QLabel>
 #include <QKeyEvent>
-//#include "generic_thread.h"
-//#include "senderthread.h"
-#include "serial_port.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -24,23 +23,23 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-    serial_port *ser;
     QTimer *timer;
     QByteArray rxBuf;
     QByteArray packet;
     uint16_t setpoint;
-    //SenderThread *sender = nullptr;
 
 public slots:
-    void onReadyRead();
+    void handleDataReceived(const QByteArray &data);
     void actuateCommand();
+    void writeData(const QByteArray &data, bool expectReply = false);
+    void onAddActuatorPanel();
     void onButtonLeftClicked();
     void onButtonMidClicked();
     void onButtonRightClicked();
 
 private:
     Ui::MainWindow *ui;
-
+    CommandWorker *worker;
     void processPacket(const QByteArray &packet);
     QLabel *PositionLabel;
     QLabel *CurrentLabel;

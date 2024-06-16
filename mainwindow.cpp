@@ -1,14 +1,15 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "mks.equipment.actuator.actuateCommand.h"
-#include "BlockingQueue.h"
+#include "serialportmanager.h"
+#include "actuatorpanel.h"
+#include "commandworker.h"
+
+#include <QMenuBar>
+#include <QMenu>
 
 QString used_port = nullptr;
 int used_baudRate = 0;
-
-// 定义全局变量和队列
-BlockingQueue<QByteArray> rxQueue;
-BlockingQueue<QByteArray> txQueue;
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -17,6 +18,20 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     setpoint = 0;
+
+    QMenuBar *menuBar = new QMenuBar(this);
+    QMenu *panelMenu = menuBar->addMenu(tr("Panel"));
+
+    QAction *addActuatorPanelAction = panelMenu->addAction(tr("Add Actuator Panel"));
+    connect(addActuatorPanelAction, &QAction::triggered, this, &MainWindow::onAddActuatorPanel);
+
+    panelMenu->addAction(tr("Firmware Upgrade"));
+
+    QMenu *helpMenu = menuBar->addMenu(tr("Help"));
+    helpMenu->addAction(tr("About us"));
+    helpMenu->addAction(tr("Contact..."));
+
+    setMenuBar(menuBar);
 
     // 設置進度條樣式以便文字顯示在中央
     ui->progressBar->setStyleSheet(
@@ -37,10 +52,10 @@ MainWindow::MainWindow(QWidget *parent)
     VoltageLabel = new QLabel("Voltage: N/A", this);
     TemperatureLabel = new QLabel("Temperature: N/A", this);
 
-    PositionLabel->setGeometry(QRect(QPoint(50, 300), QSize(250, 50)));
-    CurrentLabel->setGeometry(QRect(QPoint(50, 350), QSize(250, 50)));
-    VoltageLabel->setGeometry(QRect(QPoint(50, 400), QSize(250, 50)));
-    TemperatureLabel->setGeometry(QRect(QPoint(50, 450), QSize(250, 50)));
+    PositionLabel->setGeometry(QRect(QPoint(50, 250), QSize(250, 50)));
+    CurrentLabel->setGeometry(QRect(QPoint(50, 300), QSize(250, 50)));
+    VoltageLabel->setGeometry(QRect(QPoint(50, 350), QSize(250, 50)));
+    TemperatureLabel->setGeometry(QRect(QPoint(50, 400), QSize(250, 50)));
 
     // 設置字體大小和粗體屬性
     QFont labelFont;
@@ -52,35 +67,54 @@ MainWindow::MainWindow(QWidget *parent)
     VoltageLabel->setFont(labelFont);
     TemperatureLabel->setFont(labelFont);
 
-    ser = new serial_port(used_port, used_baudRate);
+    //ser = new serial_port(used_port, used_baudRate);
+    // 在构造函数或者需要的地方设置串行端口
+    SerialPortManager::instance().setupSerialPort(used_port, used_baudRate);
 
-    if ( ser->start() )
+    //if ( ser->start() )
     {
-        QObject::connect(ser->serialPort, &QSerialPort::readyRead, this, &MainWindow::onReadyRead);
-        // 創建一個新的 QTimer 實例，並將其設置為 mainwindow 的子物件
-        timer = new QTimer(this);
-        timer->setSingleShot(false);
-        // 將 QTimer 的 timeout 信號連接到 actuateCommand 槽函數
-        QObject::connect(timer, &QTimer::timeout, this, &MainWindow::actuateCommand);
-        timer->start(50); // 啟動定時器，並設置每 50 毫秒觸發一次 timeout 信號
+        //QObject::connect(ser->serialPort, &QSerialPort::readyRead, this, &MainWindow::onReadyRead);
+        // 接收数据
+        connect(&SerialPortManager::instance(), &SerialPortManager::dataReceived, this, &MainWindow::handleDataReceived);
+
+        // // 創建一個新的 QTimer 實例，並將其設置為 mainwindow 的子物件
+        // timer = new QTimer(this);
+        // timer->setSingleShot(false);
+        // // 將 QTimer 的 timeout 信號連接到 actuateCommand 槽函數
+        // QObject::connect(timer, &QTimer::timeout, this, &MainWindow::actuateCommand);
+        // timer->start(50); // 啟動定時器，並設置每 50 毫秒觸發一次 timeout 信號
+
+        // 创建并启动工作线程
+        worker = new CommandWorker();
+        worker->start();
+        // 当应用程序准备关闭时，停止线程
+        connect(qApp, &QCoreApplication::aboutToQuit, worker, &CommandWorker::stopWorker);
+        connect(worker, &CommandWorker::requestWriteData, this, &MainWindow::writeData);
 
         connect(ui->btn_left, &QPushButton::clicked, this, &MainWindow::onButtonLeftClicked);
         connect(ui->btn_mid, &QPushButton::clicked, this, &MainWindow::onButtonMidClicked);
         connect(ui->btn_right, &QPushButton::clicked, this, &MainWindow::onButtonRightClicked);
 
-    } else
-    {
-        //delete ser;
-        delete this;
     }
+    // else
+    // {
+    //     //delete ser;
+    //     delete this;
+    // }
 
 }
 
 MainWindow::~MainWindow()
 {
-    delete ser;
-    timer->stop();
-    delete timer;
+    if ( worker->isRunning() )
+    {
+        worker->stopWorker();
+        worker->wait();
+    }
+    delete worker;
+    //delete ser;
+    //timer->stop();
+    //delete timer;
     delete ui;
 }
 
@@ -303,9 +337,11 @@ void MainWindow::processPacket(const QByteArray &packet)
 
 }
 
-void MainWindow::onReadyRead()
+void MainWindow::handleDataReceived(const QByteArray &data)
 {
-    rxBuf.append(ser->read_message());
+    if ( data.isEmpty() ) return;
+
+    rxBuf.append(data);
 
     // 處理緩衝區中的數據
     while ( rxBuf.size() >= 8 ) // 確保有至少8個字節可以檢查 header1 和 header2 以及最小封包長度
@@ -368,11 +404,24 @@ void MainWindow::actuateCommand()
     ui->progressBar->setValue(setpoint);
 
     mks_equipment_actuator_actuateCommand_encode(&req, 0, mode, setpoint);
+
     QByteArray byteArray(reinterpret_cast<char*>(&req), sizeof(req));
-    ser->write_message(reinterpret_cast<uint8_t *>(byteArray.data()), byteArray.size());
-    //txQueue.enqueue(byteArray);
-    //qDebug() << "Queue Size: " << txQueue.queue.count() << "\n";
+
+    SerialPortManager::instance().writeData(byteArray, ( mode & 0x0e ) );
+
     req.byte4.fcn.fsh_cnt++;
+}
+
+void MainWindow::writeData(const QByteArray &data, bool expectReply)
+{
+    SerialPortManager::instance().writeData(data, expectReply);
+}
+
+void MainWindow::onAddActuatorPanel()
+{
+    ActuatorPanel *dialog = new ActuatorPanel(worker ,this);
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+    dialog->show();
 }
 
 void MainWindow::onButtonLeftClicked()
@@ -392,19 +441,20 @@ void MainWindow::onButtonRightClicked()
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
-    switch (event->key()) {
-    case Qt::Key_A:
-        setpoint = 900;
-        break;
-    case Qt::Key_S:
-        setpoint = 1500;
-        break;
-    case Qt::Key_D:
-        setpoint = 2100;
-        break;
-    default:
-        QMainWindow::keyPressEvent(event);
-        return;
+    switch (event->key())
+    {
+        case Qt::Key_A:
+            setpoint = 900;
+            break;
+        case Qt::Key_S:
+            setpoint = 1500;
+            break;
+        case Qt::Key_D:
+            setpoint = 2100;
+            break;
+        default:
+            QMainWindow::keyPressEvent(event);
+            break;
     }
 
     // 在這裡你可以執行其他操作，例如更新UI等

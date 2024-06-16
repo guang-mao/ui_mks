@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>713</width>
+    <height>494</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -157,12 +157,32 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>713</width>
      <height>20</height>
     </rect>
    </property>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionadd_Actuator">
+   <property name="text">
+    <string>Add Actuator Panel</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About</string>
+   </property>
+  </action>
+  <action name="actionActuator_Firmware_Upgrade">
+   <property name="text">
+    <string>Firmware Upgrade</string>
+   </property>
+  </action>
+  <action name="actionContact">
+   <property name="text">
+    <string>Contact</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>
