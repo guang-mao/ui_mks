@@ -7,7 +7,6 @@
 *.obj
 *.o
 *.d
-*.qrc
 *.a
 *.so
 *.dll

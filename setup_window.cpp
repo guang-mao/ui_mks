@@ -1,6 +1,6 @@
 #include "setup_window.h"
 #include "ui_setup_window.h"
-#include "serial_port.h"
+#include "serialportmanager.h"
 
 #include <QCompleter>
 #include <QSerialPortInfo>
@@ -19,8 +19,10 @@ Setup_window::Setup_window(QWidget *parent)
     // 設置對話框無標題欄
     //setWindowFlags(Qt::Dialog | Qt::FramelessWindowHint);
     setWindowFlags(Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
-    setWindowTitle("Welcome!");
+    setWindowTitle("Setup");
     //setAttribute(Qt::WA_DeleteOnClose);
+
+    setWindowIcon(QIcon(":/icons/usb.png"));
 
     iface_lister.start();
 

@@ -1,5 +1,7 @@
 #include "serialportmanager.h"
 
+QStringList baudrates = {"9600", "38400", "56000", "115200", "460800", "921600"};
+
 SerialPortManager& SerialPortManager::instance()
 {
     static SerialPortManager instance;

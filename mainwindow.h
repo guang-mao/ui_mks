@@ -33,9 +33,6 @@ public slots:
     void actuateCommand();
     void writeData(const QByteArray &data, bool expectReply = false);
     void onAddActuatorPanel();
-    void onButtonLeftClicked();
-    void onButtonMidClicked();
-    void onButtonRightClicked();
 
 private:
     Ui::MainWindow *ui;
@@ -46,7 +43,6 @@ private:
     QLabel *VoltageLabel;
     QLabel *TemperatureLabel;
 protected:
-    void keyPressEvent(QKeyEvent *event) override;
 
 };
 

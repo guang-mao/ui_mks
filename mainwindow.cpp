@@ -2,7 +2,8 @@
 #include "ui_mainwindow.h"
 #include "mks.equipment.actuator.actuateCommand.h"
 #include "serialportmanager.h"
-#include "actuatorpanel.h"
+//#include "actuatorpanel.h"
+#include "actuatordialog.h"
 #include "commandworker.h"
 
 #include <QMenuBar>
@@ -17,35 +18,25 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    setpoint = 0;
+    setWindowTitle(tr("Wizard"));
+
+    setWindowIcon(QIcon(":/icons/cube.png"));
 
     QMenuBar *menuBar = new QMenuBar(this);
     QMenu *panelMenu = menuBar->addMenu(tr("Panel"));
 
-    QAction *addActuatorPanelAction = panelMenu->addAction(tr("Add Actuator Panel"));
+    QAction *addActuatorPanelAction = panelMenu->addAction(QIcon(":/icons/servo.png"), tr("Add Actuator Panel"));
+    addActuatorPanelAction->setShortcut(QKeySequence("Alt+P"));
     connect(addActuatorPanelAction, &QAction::triggered, this, &MainWindow::onAddActuatorPanel);
+    addActuatorPanelAction->setIconVisibleInMenu(true);
 
-    panelMenu->addAction(tr("Firmware Upgrade"));
+    panelMenu->addAction(QIcon(":/icons/upload.png"), tr("Firmware Upgrade"));
 
     QMenu *helpMenu = menuBar->addMenu(tr("Help"));
-    helpMenu->addAction(tr("About us"));
-    helpMenu->addAction(tr("Contact..."));
+    helpMenu->addAction(QIcon(":/icons/about.png"), tr("About"));
+    helpMenu->addAction(QIcon(":/icons/contact.png"), tr("Contact..."));
 
     setMenuBar(menuBar);
-
-    // 設置進度條樣式以便文字顯示在中央
-    ui->progressBar->setStyleSheet(
-        "QProgressBar {"
-        "    border: 1px solid grey;"
-        "    border-radius: 5px;"
-        "    text-align: center;" // 文字居中
-        "    font-size: 16px;"    // 設置字體大小
-        "    font-weight: bold;"  // 設置粗體
-        "}"
-        "QProgressBar::chunk {"
-        "    background-color: #05B8CC;"
-        "    width: 20px;"
-        "}");
 
     PositionLabel = new QLabel("Position: N/A", this);
     CurrentLabel = new QLabel("Current: N/A", this);
@@ -67,41 +58,22 @@ MainWindow::MainWindow(QWidget *parent)
     VoltageLabel->setFont(labelFont);
     TemperatureLabel->setFont(labelFont);
 
-    //ser = new serial_port(used_port, used_baudRate);
     // 在构造函数或者需要的地方设置串行端口
     SerialPortManager::instance().setupSerialPort(used_port, used_baudRate);
 
-    //if ( ser->start() )
-    {
-        //QObject::connect(ser->serialPort, &QSerialPort::readyRead, this, &MainWindow::onReadyRead);
-        // 接收数据
-        connect(&SerialPortManager::instance(), &SerialPortManager::dataReceived, this, &MainWindow::handleDataReceived);
+    // 接收数据
+    connect(&SerialPortManager::instance(), &SerialPortManager::dataReceived, this, &MainWindow::handleDataReceived);
 
-        // // 創建一個新的 QTimer 實例，並將其設置為 mainwindow 的子物件
-        // timer = new QTimer(this);
-        // timer->setSingleShot(false);
-        // // 將 QTimer 的 timeout 信號連接到 actuateCommand 槽函數
-        // QObject::connect(timer, &QTimer::timeout, this, &MainWindow::actuateCommand);
-        // timer->start(50); // 啟動定時器，並設置每 50 毫秒觸發一次 timeout 信號
+    // 创建并启动工作线程
+    worker = new CommandWorker();
+    worker->start();
+    // 当应用程序准备关闭时，停止线程
+    connect(qApp, &QCoreApplication::aboutToQuit, worker, &CommandWorker::stopWorker);
+    connect(worker, &CommandWorker::requestWriteData, this, &MainWindow::writeData);
 
-        // 创建并启动工作线程
-        worker = new CommandWorker();
-        worker->start();
-        // 当应用程序准备关闭时，停止线程
-        connect(qApp, &QCoreApplication::aboutToQuit, worker, &CommandWorker::stopWorker);
-        connect(worker, &CommandWorker::requestWriteData, this, &MainWindow::writeData);
-
-        connect(ui->btn_left, &QPushButton::clicked, this, &MainWindow::onButtonLeftClicked);
-        connect(ui->btn_mid, &QPushButton::clicked, this, &MainWindow::onButtonMidClicked);
-        connect(ui->btn_right, &QPushButton::clicked, this, &MainWindow::onButtonRightClicked);
-
-    }
-    // else
-    // {
-    //     //delete ser;
-    //     delete this;
-    // }
-
+    //connect(ui->btn_left, &QPushButton::clicked, this, &MainWindow::onButtonLeftClicked);
+    //connect(ui->btn_mid, &QPushButton::clicked, this, &MainWindow::onButtonMidClicked);
+    //connect(ui->btn_right, &QPushButton::clicked, this, &MainWindow::onButtonRightClicked);
 }
 
 MainWindow::~MainWindow()
@@ -112,9 +84,6 @@ MainWindow::~MainWindow()
         worker->wait();
     }
     delete worker;
-    //delete ser;
-    //timer->stop();
-    //delete timer;
     delete ui;
 }
 
@@ -396,20 +365,15 @@ void MainWindow::handleDataReceived(const QByteArray &data)
 
 void MainWindow::actuateCommand()
 {
-    static actuateCommand_req_t req;
+    //static actuateCommand_req_t req;
 
-    uint8_t mode = ( (uint8_t) ( ui->ckb_act->isChecked() ) << 0u ) | ( (uint8_t) ( ui->ckb_pos->isChecked()  ) << 1u ) | \
-                   ( (uint8_t) ( ui->ckb_cir->isChecked() ) << 2u ) | ( (uint8_t) ( ui->ckb_temp->isChecked() ) << 3u );
+    //mks_equipment_actuator_actuateCommand_encode(&req, 0, mode, setpoint);
 
-    ui->progressBar->setValue(setpoint);
+    //QByteArray byteArray(reinterpret_cast<char*>(&req), sizeof(req));
 
-    mks_equipment_actuator_actuateCommand_encode(&req, 0, mode, setpoint);
+    //SerialPortManager::instance().writeData(byteArray, ( mode & 0x0e ) );
 
-    QByteArray byteArray(reinterpret_cast<char*>(&req), sizeof(req));
-
-    SerialPortManager::instance().writeData(byteArray, ( mode & 0x0e ) );
-
-    req.byte4.fcn.fsh_cnt++;
+    //req.byte4.fcn.fsh_cnt++;
 }
 
 void MainWindow::writeData(const QByteArray &data, bool expectReply)
@@ -419,45 +383,7 @@ void MainWindow::writeData(const QByteArray &data, bool expectReply)
 
 void MainWindow::onAddActuatorPanel()
 {
-    ActuatorPanel *dialog = new ActuatorPanel(worker ,this);
+    ActuatorDialog *dialog = new ActuatorDialog(worker ,this);
     dialog->setAttribute(Qt::WA_DeleteOnClose);
     dialog->show();
-}
-
-void MainWindow::onButtonLeftClicked()
-{
-    setpoint = 900;
-}
-
-void MainWindow::onButtonMidClicked()
-{
-    setpoint = 1500;
-}
-
-void MainWindow::onButtonRightClicked()
-{
-    setpoint = 2100;
-}
-
-void MainWindow::keyPressEvent(QKeyEvent *event)
-{
-    switch (event->key())
-    {
-        case Qt::Key_A:
-            setpoint = 900;
-            break;
-        case Qt::Key_S:
-            setpoint = 1500;
-            break;
-        case Qt::Key_D:
-            setpoint = 2100;
-            break;
-        default:
-            QMainWindow::keyPressEvent(event);
-            break;
-    }
-
-    // 在這裡你可以執行其他操作，例如更新UI等
-
-    event->accept(); // 標記事件已經被處理
 }

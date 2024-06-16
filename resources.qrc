@@ -1,0 +1,10 @@
+<RCC>
+    <qresource prefix="/">
+    	<file>icons/usb.png</file>
+    	<file>icons/cube.png</file>
+        <file>icons/servo.png</file>
+        <file>icons/upload.png</file>
+        <file>icons/about.png</file>
+        <file>icons/contact.png</file>
+    </qresource>
+</RCC>

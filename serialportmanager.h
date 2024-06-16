@@ -6,6 +6,8 @@
 #include <QMutex>
 #include <QTimer>
 
+extern QStringList baudrates;
+
 enum CommunicationState
 {
     Idle,

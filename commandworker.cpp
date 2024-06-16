@@ -20,6 +20,7 @@ void CommandWorker::run()
         {
             // 在这里发送命令，例如通过串口
             emit requestWriteData(command, 0);
+            QThread::msleep(1); // 讓傳送封包間有個idle時間
             //SerialPortManager::instance().writeData(command, 0 );
 
         } else
